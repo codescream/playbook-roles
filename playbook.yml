@@ -2,5 +2,10 @@
 # using roles in playbook
 - hosts: Dev
   become: true
+  tasks:
+  - name: patch server
+    dnf:
+      name: "*"
+      state: latest
   roles:
     - tomcat
