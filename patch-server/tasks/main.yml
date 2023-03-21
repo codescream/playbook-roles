@@ -1,0 +1,6 @@
+---
+# tasks file for patch-server
+- name: patch server
+  dnf:
+    name: "*"
+    state: latest
