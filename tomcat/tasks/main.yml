@@ -1,0 +1,88 @@
+---
+# tasks file for tomcat
+- name: install latest version of java
+  dnf:  
+    name: java
+    state: latest
+- name: create tomcat user with specific shell and home dir
+  user:
+    name: tomcat
+    comment: Apache tomcat user
+    home: /opt/tomcat
+    shell: /bin/false
+- name: download and unarchive tomcat
+  unarchive:
+    src: "{{ tomcat_link }}"
+    dest: /tmp
+    remote_src: yes
+- name: copy tomcat files to tomcat home folder and set tomcat as owner and group
+  copy:
+    src: "/tmp/{{ tomcat_folder }}/"
+    dest: /opt/tomcat/
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+    remote_src: yes
+- name: edit tomcat manager context.xml
+  copy:
+    src: "{{ context_xml }}"
+    dest: "{{ meta_inf }}"
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+    remote_src: no
+- name: edit tomcat host-manager context.xml
+  copy:
+    src: "{{ context_xml }}"
+    dest: "{{ host_meta_inf }}"
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+    remote_src: no
+- name: setup user accounts
+  copy:
+    src: "{{ users_xml }}"
+    dest: /opt/tomcat/conf/tomcat-users.xml
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+    remote_src: no 
+- name: create tomcat service file
+  copy:
+    src: "{{ systemd_file }}"
+    dest: /etc/systemd/system/tomcat.service
+    owner: root
+    group: root
+    mode: 0755
+    remote_src: no
+- name: Change tomcat root directory permissions
+  file:
+    path: /opt
+    state: directory
+    owner: tomcat
+    group: tomcat
+    mode: 0755
+    recurse: yes
+- name: reload systemctl daemon
+  systemd:
+    daemon_reload: yes
+- name: open port 8080 
+  firewalld:
+    port: "{{ port }}/{{ proto }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+- name: restore SELinux file context to filesystem
+  ansible.builtin.command: restorecon -Rv /opt/tomcat
+- name: start tomcat service if not started
+  service:
+    name: tomcat
+    state: started
+    enabled: true
+- name: download jenkins
+  get_url:
+    url: "{{ jenkins_link }}"
+    dest: "{{ jenkins_webapp }}"
+    owner: root
+    group: root
+    mode: 0755

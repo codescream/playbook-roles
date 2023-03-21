@@ -1,0 +1,6 @@
+---
+# using roles in playbook
+- hosts: Dev
+  become: true
+  roles:
+    - tomcat
