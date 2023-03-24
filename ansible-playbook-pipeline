@@ -1,0 +1,15 @@
+pipeline {
+    agent any
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git 'https://github.com/codescream/playbook-roles.git'
+            }
+        }
+        stage('Invoke Playbook') {
+            steps {
+                ansiblePlaybook credentialsId: 'ansible-access', inventory: '/opt/tomcat/.jenkins/workspace/ansible-roles-playbook-pipeline/hosts', playbook: '/opt/tomcat/.jenkins/workspace/ansible-roles-playbook-pipeline/playbook.yml'
+            }
+        }
+    }
+}
