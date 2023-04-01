@@ -1,0 +1,22 @@
+pipeline {
+    agent any
+    stages {
+        stage('Pull Image') {
+            steps {
+                sh 'docker pull httpd'
+            }
+        }
+        stage('Tag image') {
+            steps {
+                sh 'docker tag httpd public.ecr.aws/r9w1t8u7/apache-img:v1'
+            }
+        }
+        stage('Push Image to AWS ECR') {
+            steps {
+                withCredentials ([<object of type com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentialsBinding>]) {
+                    sh 'docker push public.ecr.aws/r9w1t8u7/apache-img:v1'
+                }    
+            }
+        }
+    }
+}
